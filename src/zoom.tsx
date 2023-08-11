@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import type { ViewProps } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -22,6 +22,7 @@ type Props = {
   simultaneousGesture?: GestureType;
   onZoomBegin?: () => void;
   onZoomEnd?: () => void;
+  isPortrait?: boolean;
 } & ViewProps;
 
 export function Zoom(props: Props) {
@@ -33,6 +34,7 @@ export function Zoom(props: Props) {
     onZoomBegin,
     onZoomEnd,
     simultaneousGesture,
+    isPortrait,
   } = props;
 
   const zoomListContext = useContext(ZoomListContext);
@@ -55,8 +57,7 @@ export function Zoom(props: Props) {
   const panTranslateX = useSharedValue(0);
   const panTranslateY = useSharedValue(0);
 
-  const gesture = useMemo(() => {
-    const resetZoomState = () => {
+   const resetZoomState = () => {
       'worklet';
       // reset all state
       translationX.value = withTiming(0);
@@ -72,6 +73,7 @@ export function Zoom(props: Props) {
       panTranslateY.value = 0;
     };
 
+  const gesture = useMemo(() => {
     // we only activate pan handler when the image is zoomed or user is not pinching
     const pan = Gesture.Pan()
       .onStart(() => {
@@ -223,6 +225,14 @@ export function Zoom(props: Props) {
     zoomListContext,
     simultaneousGesture,
   ]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (scale.value > 1) {
+        resetZoomState();
+      } 
+    }, 500);
+  }, [isPortrait]);
 
   useDerivedValue(() => {
     if (scale.value > 1 && !isZoomed.value) {
