@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
-import type { ViewProps } from 'react-native';
+import { Platform, type ViewProps } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -100,10 +100,10 @@ export function Zoom(props: Props) {
             (viewHeight.value / 2) * scale.value - viewHeight.value / 2;
           const minTranslateY = -maxTranslateY;
 
-          const nextTranslateX =
-            prevTranslationX.value + e.translationX - panTranslateX.value;
+         const nextTranslateX =
+            prevTranslationX.value + ( e.translationX - panTranslateX.value ) * ( Platform.OS === 'android' ? -1 : 1 );
           const nextTranslateY =
-            prevTranslationY.value + e.translationY - panTranslateY.value;
+            prevTranslationY.value + ( e.translationY - panTranslateY.value ) * (Platform.OS === 'android' ? -1 : 1 );
 
           if (nextTranslateX > maxTranslateX) {
             translationX.value = maxTranslateX;
@@ -230,7 +230,7 @@ export function Zoom(props: Props) {
     setTimeout(() => {
       if (scale.value > 1) {
         resetZoomState();
-      } 
+      }
     }, 500);
   }, [isPortrait]);
 
